@@ -62,7 +62,7 @@ class Campaign(models.Model):
     product_docs = models.TextField(blank=True)
     campaign_objective = models.TextField(blank=True)
     booking_link = models.URLField(max_length=500, blank=True)
-    is_freemium = models.BooleanField(default=False)
+    is_job_hunt = models.BooleanField(default=False)
     action_fraction = models.FloatField(default=0.2)
     seed_public_ids = models.JSONField(default=list, blank=True)
     model_blob = models.BinaryField(null=True, blank=True)
@@ -249,3 +249,48 @@ class Task(models.Model):
     def mark_failed(self):
         self.status = self.Status.FAILED
         self.save(update_fields=["status"])
+
+
+class JobHuntProfile(models.Model):
+    campaign = models.OneToOneField(Campaign, on_delete=models.CASCADE, related_name="job_hunt_profile")
+    target_roles = models.JSONField(default=list, help_text="List of target job roles")
+    resume_url = models.URLField(max_length=500, blank=True)
+    years_experience = models.CharField(max_length=100, blank=True)
+    current_role = models.CharField(max_length=300, blank=True)
+    current_company = models.CharField(max_length=300, blank=True)
+    skills = models.TextField(blank=True, help_text="Key skills and technologies")
+    target_companies = models.JSONField(default=list, blank=True)
+    target_locations = models.JSONField(default=list, blank=True)
+    standout_points = models.TextField(blank=True)
+    message_tone = models.CharField(max_length=100, default="professional")
+    education = models.TextField(blank=True)
+    experience_details = models.TextField(blank=True)
+    achievements = models.TextField(blank=True)
+    additional_context = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Job Hunt: {', '.join(self.target_roles)}"
+
+    def to_context(self) -> dict:
+        """Return all fields as a flat dict for prompt rendering."""
+        return {
+            "target_roles": ", ".join(self.target_roles),
+            "resume_url": self.resume_url,
+            "years_experience": self.years_experience,
+            "current_role": self.current_role,
+            "current_company": self.current_company,
+            "skills": self.skills,
+            "target_companies": ", ".join(self.target_companies),
+            "target_locations": ", ".join(self.target_locations),
+            "standout_points": self.standout_points,
+            "message_tone": self.message_tone,
+            "education": self.education,
+            "experience_details": self.experience_details,
+            "achievements": self.achievements,
+            "additional_context": self.additional_context,
+        }
+
+    class Meta:
+        app_label = "linkedin"

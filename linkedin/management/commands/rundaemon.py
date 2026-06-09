@@ -8,19 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Run the OpenOutreach daemon (onboard, validate, start task queue)."
+    help = "Run the daemon (start task queue)."
 
     def handle(self, *args, **options):
         self._configure_logging(verbose=options["verbosity"] >= 2)
         self._ensure_db()
         self._ensure_onboarded()
         session = self._create_session()
-        self._ensure_newsletter(session)
 
         from linkedin.daemon import run_daemon
         run_daemon(session)
-
-    # -- Steps ---------------------------------------------------------------
 
     def _configure_logging(self, verbose: bool = False):
         from linkedin.logging import configure_logging, print_banner
@@ -70,25 +67,6 @@ class Command(BaseCommand):
         if not session.campaigns:
             logger.error("No campaigns found for this user.")
             sys.exit(1)
-        campaign = next(
-            (c for c in session.campaigns if not c.is_freemium), None,
-        ) or session.campaigns[0]
-        session.campaign = campaign
+        session.campaign = session.campaigns[0]
 
         return session
-
-    def _ensure_newsletter(self, session):
-        if session.linkedin_profile.newsletter_processed:
-            return
-
-        from linkedin.api.newsletter import ensure_newsletter_subscription
-        from linkedin.setup.gdpr import apply_gdpr_newsletter_override
-        from linkedin_cli.url_utils import public_id_to_url
-
-        profile = session.self_profile
-        country_code = profile.get("country_code")
-        apply_gdpr_newsletter_override(session, country_code)
-        linkedin_url = public_id_to_url(profile["public_identifier"])
-        ensure_newsletter_subscription(session, linkedin_url=linkedin_url)
-        session.linkedin_profile.newsletter_processed = True
-        session.linkedin_profile.save(update_fields=["newsletter_processed"])

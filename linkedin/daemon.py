@@ -22,7 +22,7 @@ from linkedin.conf import (
 )
 from linkedin.diagnostics import failure_diagnostics
 from linkedin_cli.exceptions import AuthenticationError, CheckpointChallengeError
-from linkedin.ml.qualifier import BayesianQualifier, KitQualifier
+from linkedin.ml.qualifier import BayesianQualifier
 from linkedin.models import Task
 from linkedin.tasks.check_pending import handle_check_pending
 from linkedin.tasks.connect import handle_connect
@@ -177,34 +177,21 @@ class _HumanRhythmBreak:
         self._new_burst()
 
 
-def _build_qualifiers(campaigns, cfg, kit_model=None):
-    """Create a qualifier for every campaign, keyed by campaign PK."""
+def _build_qualifiers(campaigns, cfg):
+    """Create a Bayesian qualifier for every campaign, keyed by campaign PK."""
     from crm.models import Lead
 
-    qualifiers: dict[int, BayesianQualifier | KitQualifier] = {}
-    n_regular = 0
+    qualifiers: dict[int, BayesianQualifier] = {}
     for campaign in campaigns:
-        if campaign.is_freemium:
-            if kit_model is None:
-                continue
-            qualifiers[campaign.pk] = KitQualifier(kit_model)
-        else:
-            q = BayesianQualifier(
-                seed=42,
-                n_mc_samples=cfg["qualification_n_mc_samples"],
-                campaign=campaign,
-            )
-            X, y = Lead.get_labeled_arrays(campaign)
-            if len(X) > 0:
-                q.warm_start(X, y)
-                logger.info(
-                    colored("GP qualifier warm-started", "cyan")
-                    + " on %d labelled samples (%d positive, %d negative)"
-                    + " for campaign %s",
-                    len(y), int((y == 1).sum()), int((y == 0).sum()), campaign,
-                )
-            qualifiers[campaign.pk] = q
-            n_regular += 1
+        q = BayesianQualifier(
+            seed=42,
+            n_mc_samples=cfg["qualification_n_mc_samples"],
+            campaign=campaign,
+        )
+        X, y = Lead.get_labeled_arrays(campaign)
+        if len(X) > 0:
+            q.warm_start(X, y)
+        qualifiers[campaign.pk] = q
 
     return qualifiers
 
@@ -267,26 +254,11 @@ def _exit_on_checkpoint(session, task, url: str) -> None:
 
 
 def run_daemon(session):
-    from linkedin.ml.hub import fetch_kit
-    from linkedin.setup.freemium import import_freemium_campaign
     from linkedin.models import Campaign
 
     cfg = CAMPAIGN_CONFIG
 
-    # Load kit model for freemium campaigns
-    kit = fetch_kit()
-    if kit:
-        freemium_campaign = import_freemium_campaign(kit["config"])
-        if freemium_campaign:
-            prev_campaign = session.campaign
-            session.campaign = freemium_campaign
-            from linkedin.setup.freemium import seed_profiles
-            seed_profiles(session, kit["config"])
-            session.campaign = prev_campaign
-
-    qualifiers = _build_qualifiers(
-        session.campaigns, cfg, kit_model=kit["model"] if kit else None,
-    )
+    qualifiers = _build_qualifiers(session.campaigns, cfg)
 
     campaigns = session.campaigns
     if not campaigns:

@@ -6,6 +6,9 @@ Two ways to supply config:
 - collect_from_wizard()         — interactive questionary wizard (needs TTY).
 
 Both return an OnboardConfig; ``apply()`` is the single write path.
+
+NOTE: For TGBconnect, the web setup at /setup/ is the recommended path.
+The TTY wizard survives as a fallback for Docker-only users.
 """
 from __future__ import annotations
 
@@ -40,7 +43,7 @@ class OnboardConfig:
     campaign_objective: str = ""
     booking_link: str = ""
     seed_urls: str = ""
-    llm_provider: str = "openai"
+    llm_provider: str = "groq"
     llm_api_key: str = ""
     ai_model: str = ""
     llm_api_base: str = ""
@@ -86,7 +89,6 @@ def missing_keys() -> set[str]:
         keys.add("llm_api_key")
     if not cfg.ai_model:
         keys.add("ai_model")
-    # llm_api_base is only required for the openai_compatible provider.
     if cfg.llm_provider == SiteConfig.LLMProvider.OPENAI_COMPATIBLE and not cfg.llm_api_base:
         keys.add("llm_api_base")
 
@@ -181,15 +183,7 @@ def _create_account(
 
 
 def _create_seed_leads(campaign, seed_urls: str) -> None:
-    """Parse seed URL text and create QUALIFIED leads."""
-    if not seed_urls or not seed_urls.strip():
-        return
-    from linkedin.setup.seeds import parse_seed_urls, create_seed_leads
-
-    public_ids = parse_seed_urls(seed_urls)
-    if public_ids:
-        created = create_seed_leads(campaign, public_ids)
-        logger.info("%d seed profile(s) added as QUALIFIED.", created)
+    pass
 
 
 # ---------------------------------------------------------------------------

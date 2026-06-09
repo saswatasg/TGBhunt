@@ -1,4 +1,7 @@
-# local.yml
+# local.yml — TGBconnect Docker Compose
+# Two services:
+#   app:   LinkedIn automation daemon + VNC (:6080)
+#   admin: Django admin + sales dashboard (:8000)
 
 services:
   app:
@@ -18,3 +21,26 @@ services:
       - .:/app
     ports:
       - "6080:6080"
+
+  admin:
+    build:
+      context: .
+      dockerfile: ./compose/linkedin/Dockerfile
+      args:
+        - BUILD_ENV=local
+    restart: unless-stopped
+    environment:
+      - HOST_UID=${HOST_UID:-1000}
+      - HOST_GID=${HOST_GID:-1000}
+      - DJANGO_SETTINGS_MODULE=linkedin.django_settings
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    entrypoint:
+      - /usr/sbin/gosu
+      - ubuntu
+      - python
+      - manage.py
+      - runserver
+      - 0.0.0.0:8000

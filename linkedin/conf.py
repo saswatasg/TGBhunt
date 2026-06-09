@@ -26,8 +26,8 @@ MAX_DELAY = 8
 # ----------------------------------------------------------------------
 # Onboarding defaults (shown to user during interactive setup)
 # ----------------------------------------------------------------------
-DEFAULT_CONNECT_DAILY_LIMIT = 20
-DEFAULT_FOLLOW_UP_DAILY_LIMIT = 25
+DEFAULT_CONNECT_DAILY_LIMIT = 10
+DEFAULT_FOLLOW_UP_DAILY_LIMIT = 20
 
 # ----------------------------------------------------------------------
 # Active-hours schedule (daemon pauses outside this window)
@@ -64,5 +64,3 @@ CAMPAIGN_CONFIG = {
     "break_min_seconds": 600,    # 10 min
     "break_max_seconds": 1200,   # 20 min
 }
-
-

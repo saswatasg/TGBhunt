@@ -70,7 +70,6 @@ def _next_followup_deal(campaign):
 
 def handle_follow_up(task, session, qualifiers):
     from linkedin_cli.actions.message import send_raw_message
-    from linkedin.agents.follow_up import run_follow_up_agent
     from linkedin.db.deals import set_profile_state
     from linkedin.db.summaries import materialize_profile_summary_if_missing
 
@@ -79,6 +78,11 @@ def handle_follow_up(task, session, qualifiers):
     if not session.linkedin_profile.can_execute(ActionLog.ActionType.FOLLOW_UP):
         logger.info("[%s] follow_up: daily limit reached — slot skipped", campaign)
         return
+
+    if campaign.is_job_hunt:
+        return _handle_job_hunt_follow_up(task, session, campaign)
+
+    from linkedin.agents.follow_up import run_follow_up_agent
 
     deal = _next_followup_deal(campaign)
     if deal is None:
@@ -106,9 +110,6 @@ def handle_follow_up(task, session, qualifiers):
         session.linkedin_profile.record_action(
             ActionLog.ActionType.FOLLOW_UP, session.campaign,
         )
-        # Persist the outgoing message locally and bump update_date so the
-        # next slot's eligibility query respects the cooldown and moves
-        # this deal to the back of the queue.
         from linkedin.db.chat import sync_conversation
         try:
             sync_conversation(session, public_id)
@@ -121,6 +122,52 @@ def handle_follow_up(task, session, qualifiers):
         logger.info("[%s] follow_up completed for %s: outcome=%s", campaign, public_id, decision.outcome)
 
     elif decision.action == "wait":
-        # Bump update_date so the eligibility query cycles to a different deal
-        # next time; this deal returns to the front only after others are touched.
+        deal.save()
+
+
+def _handle_job_hunt_follow_up(task, session, campaign):
+    """Follow-up handler for job hunt campaigns."""
+    from linkedin_cli.actions.message import send_raw_message
+    from linkedin.agents.job_hunt import run_job_hunt_agent
+    from linkedin.db.deals import set_profile_state
+    from linkedin.db.summaries import materialize_profile_summary_if_missing
+
+    deal = _next_followup_deal(campaign)
+    if deal is None:
+        logger.info("[job_hunt] no eligible CONNECTED deal — slot skipped")
+        return
+
+    public_id = deal.lead.public_identifier
+    logger.info(
+        "[job_hunt] %s %s",
+        colored("▶ follow_up", "cyan", attrs=["bold"]), public_id,
+    )
+
+    materialize_profile_summary_if_missing(deal, session)
+    decision = run_job_hunt_agent(session, deal)
+
+    profile = _build_send_profile(deal)
+
+    if decision.action == "send_message":
+        logger.info("[job_hunt] message for %s: %s", public_id, decision.message)
+        sent = send_raw_message(session, profile, decision.message)
+        if not sent:
+            set_profile_state(session, public_id, ProfileState.QUALIFIED.value)
+            logger.warning("[job_hunt] send failed for %s — moving to QUALIFIED", public_id)
+            return
+        session.linkedin_profile.record_action(
+            ActionLog.ActionType.FOLLOW_UP, session.campaign,
+        )
+        from linkedin.db.chat import sync_conversation
+        try:
+            sync_conversation(session, public_id)
+        except Exception:
+            logger.exception("[job_hunt] post-send sync failed for %s (best-effort)", public_id)
+        deal.save()
+
+    elif decision.action == "mark_completed":
+        set_profile_state(session, public_id, ProfileState.COMPLETED.value, outcome=decision.outcome)
+        logger.info("[job_hunt] completed for %s: outcome=%s", public_id, decision.outcome)
+
+    elif decision.action == "wait":
         deal.save()

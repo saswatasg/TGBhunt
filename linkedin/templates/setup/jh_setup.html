@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Up Your Job Hunt</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0a66c2 0%, #004182 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .container { max-width: 560px; width: 100%; padding: 20px; }
+  .card { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+  .logo { text-align: center; margin-bottom: 8px; font-size: 36px; }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 28px; }
+  .step-indicator { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; }
+  .step-indicator .dot { width: 10px; height: 10px; border-radius: 50%; background: #e0e0e0; }
+  .step-indicator .dot.active { background: #0a66c2; }
+  .step-indicator .dot.done { background: #4caf50; }
+  .field { margin-bottom: 18px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #444; }
+  textarea, input[type="text"], input[type="url"], input[type="password"], select { width: 100%; padding: 11px 14px; border: 1px solid #d0d0d0; border-radius: 8px; font-size: 15px; font-family: inherit; transition: border-color .2s; }
+  textarea:focus, input:focus, select:focus { outline: none; border-color: #0a66c2; box-shadow: 0 0 0 3px rgba(10,102,194,.1); }
+  textarea { min-height: 80px; resize: vertical; }
+  .help { font-size: 12px; color: #999; margin-top: 4px; }
+  .error { color: #d32f2f; font-size: 13px; margin-top: 4px; }
+  .error-block { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-bottom: 20px; color: #d32f2f; font-size: 14px; }
+  .actions { margin-top: 24px; }
+  .btn { width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-primary { background: #0a66c2; color: #fff; }
+  .btn-primary:hover { background: #084d94; }
+  .btn-secondary { background: #f0f0f0; color: #555; }
+  .btn-row { display: flex; gap: 12px; }
+  .btn-row .btn { flex: 1; }
+  .section-title { font-size: 16px; font-weight: 700; color: #0a66c2; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e8f0fe; }
+  .success-icon { text-align: center; font-size: 64px; margin-bottom: 16px; }
+  .success-msg { text-align: center; margin-bottom: 24px; }
+  .success-msg h2 { font-size: 22px; margin-bottom: 8px; }
+  .success-msg p { color: #666; font-size: 15px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="logo">🔍</div>
+    <h1>Job Hunt Assistant</h1>
+    <p class="subtitle">Let's set up your automated LinkedIn job search</p>
+
+    <div class="step-indicator">
+      {% for i in "1234"|make_list %}
+      <div class="dot {% if forloop.counter == step %}active{% elif forloop.counter < step %}done{% endif %}"></div>
+      {% endfor %}
+    </div>
+
+    {% if errors %}
+    <div class="error-block">
+      {% for err in errors.values %}{{ err }}<br>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="step" value="{{ step }}">
+
+      {% if step == 1 %}
+        <div class="section-title">🔑 Step 1: LinkedIn &amp; AI Setup</div>
+
+        <div class="field">
+          <label>LinkedIn Email</label>
+          <input type="text" name="linkedin_email" placeholder="your@email.com" value="{{ values.linkedin_email }}" required>
+        </div>
+        <div class="field">
+          <label>LinkedIn Password</label>
+          <input type="password" name="linkedin_password" placeholder="Your LinkedIn password" required>
+        </div>
+
+        <div class="field">
+          <label>AI Provider</label>
+          <select name="llm_provider">
+            {% for value, label in provider_choices %}
+            <option value="{{ value }}" {% if values.llm_provider == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>AI Model</label>
+          <input type="text" name="llm_model" placeholder="llama-3.3-70b-versatile" value="{{ values.llm_model|default:'llama-3.3-70b-versatile' }}">
+          <div class="help">Groq: llama-3.3-70b-versatile | OpenAI: gpt-4o | Anthropic: claude-sonnet-4-20250514</div>
+        </div>
+        <div class="field">
+          <label>API Key</label>
+          <input type="text" name="llm_api_key" placeholder="sk-..." required>
+        </div>
+
+      {% elif step == 2 %}
+        <div class="section-title">🎯 Step 2: Your Target</div>
+
+        <div class="field">
+          <label>Target Job Roles *</label>
+          <textarea name="target_roles" placeholder="e.g., Senior Software Engineer, Engineering Manager" required>{{ request.session.jh_target_roles|join:", " }}</textarea>
+          <div class="help">Separate multiple roles with commas</div>
+        </div>
+        <div class="field">
+          <label>Current Role</label>
+          <input type="text" name="current_role" placeholder="e.g., Software Engineer at Acme Corp" value="{{ request.session.jh_current_role }}">
+        </div>
+        <div class="field">
+          <label>Years of Experience</label>
+          <input type="text" name="years_experience" placeholder="e.g., 8 years" value="{{ request.session.jh_years_experience }}">
+        </div>
+        <div class="field">
+          <label>Your Key Skills</label>
+          <textarea name="skills" placeholder="e.g., Python, AWS, Kubernetes, React, System Design">{{ request.session.jh_skills }}</textarea>
+        </div>
+        <div class="field">
+          <label>Resume Link (optional)</label>
+          <input type="url" name="resume_url" placeholder="https://drive.google.com/..." value="{{ request.session.jh_resume_url }}">
+        </div>
+
+      {% elif step == 3 %}
+        <div class="section-title">✨ Step 3: Your Story</div>
+
+        <div class="field">
+          <label>Notable Achievements</label>
+          <textarea name="achievements" placeholder="e.g., Led migration of 50 microservices to Kubernetes">{{ request.session.jh_achievements }}</textarea>
+        </div>
+        <div class="field">
+          <label>What Makes You Stand Out?</label>
+          <textarea name="standout_points" placeholder="e.g., Combination of deep technical knowledge and product sense">{{ request.session.jh_standout_points }}</textarea>
+        </div>
+        <div class="field">
+          <label>Education</label>
+          <textarea name="education" placeholder="e.g., B.S. Computer Science, MIT (2018)">{{ request.session.jh_education }}</textarea>
+        </div>
+        <div class="field">
+          <label>Current Company (optional)</label>
+          <input type="text" name="current_company" placeholder="e.g., Google" value="{{ request.session.jh_company }}">
+        </div>
+        <div class="field">
+          <label>Target Companies (optional)</label>
+          <textarea name="target_companies" placeholder="e.g., Google, Stripe, Datadog">{{ request.session.jh_target_companies|join:", " }}</textarea>
+        </div>
+        <div class="field">
+          <label>Target Locations (optional)</label>
+          <textarea name="target_locations" placeholder="e.g., San Francisco, Remote">{{ request.session.jh_target_locations|join:", " }}</textarea>
+        </div>
+        <div class="field">
+          <label>Anything Else?</label>
+          <textarea name="additional_context" placeholder="Other context for your job search">{{ request.session.jh_additional_context }}</textarea>
+        </div>
+
+      {% endif %}
+
+      <div class="actions">
+        {% if step < 3 %}
+          <button type="submit" class="btn btn-primary">Continue</button>
+        {% elif step == 3 %}
+          <button type="submit" class="btn btn-primary">Start My Job Hunt 🚀</button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

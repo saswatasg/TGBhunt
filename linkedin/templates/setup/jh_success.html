@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ready! — Job Hunt Assistant</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0a66c2 0%, #004182 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .container { max-width: 480px; width: 100%; padding: 20px; }
+  .card { background: #fff; border-radius: 16px; padding: 48px 40px; box-shadow: 0 20px 60px rgba(0,0,0,.2); text-align: center; }
+  .icon { font-size: 72px; margin-bottom: 16px; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  p { color: #666; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+  .btn { display: inline-block; margin-top: 24px; padding: 14px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; background: #0a66c2; color: #fff; }
+  .btn:hover { background: #084d94; }
+  .steps { text-align: left; margin: 24px 0; background: #f8f9fa; border-radius: 8px; padding: 20px; }
+  .steps li { padding: 6px 0; font-size: 14px; color: #555; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="icon">🎉</div>
+    <h1>You're All Set!</h1>
+    <p>Your Job Hunt Assistant is ready to go.</p>
+    {% if temp_password %}
+    <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px;margin:16px 0;text-align:left;font-size:13px;">
+      <strong>🔑 Auto-logged in.</strong><br>
+      If you log out, use password: <code>{{ temp_password }}</code><br>
+      (username: <code>{{ user.username }}</code>)
+    </div>
+    {% endif %}
+    <div class="steps">
+      <strong>What happens next:</strong>
+      <ol>
+        <li>Open your terminal and run <code>python3 manage_jh.py</code> to start the daemon</li>
+        <li>The daemon logs into LinkedIn and starts finding relevant people</li>
+        <li>You'll see connections appear on your dashboard</li>
+        <li>The AI crafts personalized messages for each connection</li>
+      </ol>
+    </div>
+    <p style="font-size:13px;color:#999;">Keep this browser tab open — your dashboard is at the link below.</p>
+    <a href="/dashboard/job-hunt/" class="btn">View Your Dashboard</a>
+  </div>
+</div>
+</body>
+</html>

@@ -35,14 +35,13 @@ def strategy_for(campaign, qualifiers):
     """Build the right ConnectStrategy based on campaign type."""
     qualifier = qualifiers.get(campaign.pk)
 
-    if campaign.is_freemium:
-        from linkedin.db.deals import create_freemium_deal
-        from linkedin.pipeline.freemium_pool import find_freemium_candidate
+    if campaign.is_job_hunt:
+        from linkedin.pipeline.job_hunt_pool import find_job_hunt_candidate
 
         return ConnectStrategy(
-            find_candidate=lambda s: find_freemium_candidate(s, qualifier),
-            pre_connect=lambda s, pid: create_freemium_deal(s, pid),
-            qualifier=qualifier,
+            find_candidate=lambda s: find_job_hunt_candidate(s, campaign),
+            pre_connect=None,
+            qualifier=None,
         )
 
     from linkedin.pipeline.pools import find_candidate

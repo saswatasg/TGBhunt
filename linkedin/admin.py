@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from chat.models import ChatMessage
 
-from linkedin.models import ActionLog, Campaign, LinkedInProfile, SearchKeyword, SiteConfig, Task
+from linkedin.models import ActionLog, Campaign, JobHuntProfile, LinkedInProfile, SearchKeyword, SiteConfig, Task
 
 
 @admin.register(SiteConfig)
@@ -19,7 +19,7 @@ class SiteConfigAdmin(admin.ModelAdmin):
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ("name", "booking_link", "is_freemium", "action_fraction")
+    list_display = ("name", "booking_link", "is_job_hunt", "action_fraction")
     filter_horizontal = ("users",)
 
 
@@ -64,3 +64,9 @@ class ChatMessageAdmin(admin.ModelAdmin):
     raw_id_fields = ("owner", "answer_to", "topic")
     date_hierarchy = "creation_date"
     readonly_fields = ("content_type", "object_id", "content", "owner", "creation_date")
+
+
+@admin.register(JobHuntProfile)
+class JobHuntProfileAdmin(admin.ModelAdmin):
+    list_display = ("campaign", "target_roles", "current_role", "created_at")
+    search_fields = ("target_roles", "current_role", "skills")

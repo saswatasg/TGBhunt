@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class ProfileState(StrEnum):
+class ProfileState(str, Enum):
     QUALIFIED = "Qualified"
     READY_TO_CONNECT = "Ready to Connect"
     PENDING = "Pending"

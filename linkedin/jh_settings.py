@@ -1,23 +1,16 @@
-# linkedin/django_settings.py
-"""
-Minimal Django settings for using DjangoCRM's ORM + admin.
-"""
+# linkedin/jh_settings.py
+"""Job-hunt-only Django settings."""
 import os
 import sys
 from pathlib import Path
 
-# Playwright's sync API runs inside an async event loop, which triggers
-# Django's async-safety check. We only use the ORM synchronously, so this is safe.
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 BASE_DIR = ROOT_DIR
-
-SECRET_KEY = "openoutreach-local-dev-key-change-in-production"
-
+SECRET_KEY = "jh-local-dev-key-change-in-production"
 DEBUG = True
-
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -70,24 +63,17 @@ DATABASES = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 SITE_ID = 1
-
 STATIC_URL = "/static/"
 STATIC_ROOT = ROOT_DIR / "staticfiles"
-
 MEDIA_URL = "/media/"
 MEDIA_ROOT = ROOT_DIR / "media"
-
 LOGIN_URL = "/admin/login/"
-
 DEFAULT_FROM_EMAIL = "noreply@localhost"
-EMAIL_SUBJECT_PREFIX = "CRM: "
-
+EMAIL_SUBJECT_PREFIX = "JH: "
 LANGUAGE_CODE = "en"
 LANGUAGES = [("en", "English")]
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
 TESTING = sys.argv[1:2] == ["test"]
