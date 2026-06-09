@@ -3,7 +3,7 @@
 linkedin_cli owns no browser lifecycle and no persistence. Each verb is handed
 a *session* — an object that exposes a live Playwright page/context plus a few
 lifecycle hooks — and drives LinkedIn through it. The concrete session is the
-caller's job: OpenOutreach's daemon backs it with its Django ``AccountSession``;
+caller's job: the daemon backs it with its Django ``AccountSession``;
 the standalone CLI backs it with a Playwright CLI session adapter.
 
 ``LinkedInSession`` is the typed boundary between the two — it lists exactly what

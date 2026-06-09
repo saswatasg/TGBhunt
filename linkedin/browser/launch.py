@@ -2,7 +2,7 @@
 """Persist + orchestrate the daemon's LinkedIn browser session.
 
 Cookie persistence (to the Django DB) and the launch/login orchestration are
-OpenOutreach concerns, so they live here. The reusable *mechanics* — launching a
+Job Hunt Assistant concerns, so they live here. The reusable *mechanics* — launching a
 stealthed browser, driving the login form, clearing checkpoints — stay in the
 Django-free ``linkedin_cli.browser`` library and are called from here.
 """

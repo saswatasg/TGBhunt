@@ -20,7 +20,7 @@ BANNER = r"""
 
 
 def print_banner():
-    """Print the OpenOutreach startup banner in bold cyan."""
+    """Print the startup banner in bold cyan."""
     sys.stdout.write(colored(BANNER, "cyan", attrs=["bold"]))
     sys.stdout.write("\n")
     sys.stdout.flush()

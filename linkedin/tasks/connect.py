@@ -72,7 +72,7 @@ def handle_connect(task, session, qualifiers):
     public_id = candidate["public_identifier"]
     profile = candidate.get("profile") or candidate
 
-    # Freemium campaigns need a Deal before set_profile_state
+    # Ensure a Deal exists before set_profile_state
     if strategy.pre_connect:
         strategy.pre_connect(session, public_id)
 

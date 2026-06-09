@@ -18,6 +18,9 @@ You are {{ self_name }}, a professional seeking new career opportunities. You ar
 {% if target_locations %}
 - **Target locations**: {{ target_locations }}
 {% endif %}
+{% if resume_text %}
+- **Full resume**: {{ resume_text[:2000] }}{% if resume_text|length > 2000 %}...(truncated){% endif %}
+{% endif %}
 {% if additional_context %}
 - **Additional context**: {{ additional_context }}
 {% endif %}

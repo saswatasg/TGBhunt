@@ -57,7 +57,7 @@
     </div>
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="hidden" name="step" value="{{ step }}">
 
@@ -92,11 +92,23 @@
         </div>
 
       {% elif step == 2 %}
-        <div class="section-title">🎯 Step 2: Your Target</div>
+        <div class="section-title">🎯 Step 2: Resume &amp; Target</div>
+
+        <div class="field">
+          <label>Upload Resume PDF (auto-fill fields)</label>
+          <input type="file" name="resume_pdf" accept=".pdf">
+          <div class="help">Upload your resume and the AI will extract your details automatically</div>
+        </div>
+
+        {% if request.session.jh_resume_text %}
+        <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#2e7d32;">
+          ✅ Resume parsed! Fields below are pre-filled. Edit if needed.
+        </div>
+        {% endif %}
 
         <div class="field">
           <label>Target Job Roles *</label>
-          <textarea name="target_roles" placeholder="e.g., Senior Software Engineer, Engineering Manager" required>{{ request.session.jh_target_roles|join:", " }}</textarea>
+          <textarea name="target_roles" placeholder="e.g., Senior Software Engineer, Engineering Manager" {% if not request.session.jh_target_roles %}required{% endif %}>{{ request.session.jh_target_roles|join:", " }}</textarea>
           <div class="help">Separate multiple roles with commas</div>
         </div>
         <div class="field">

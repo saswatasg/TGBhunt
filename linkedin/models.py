@@ -266,6 +266,7 @@ class JobHuntProfile(models.Model):
     education = models.TextField(blank=True)
     experience_details = models.TextField(blank=True)
     achievements = models.TextField(blank=True)
+    resume_text = models.TextField(blank=True, default="", help_text="Raw text extracted from uploaded resume PDF")
     additional_context = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -290,6 +291,7 @@ class JobHuntProfile(models.Model):
             "experience_details": self.experience_details,
             "achievements": self.achievements,
             "additional_context": self.additional_context,
+            "resume_text": self.resume_text,
         }
 
     class Meta:

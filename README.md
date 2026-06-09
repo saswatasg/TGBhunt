@@ -2,44 +2,31 @@
 
 > **Self-hosted LinkedIn automation for job seekers.** Connect with recruiters and hiring managers at your target companies, powered by AI.
 
-<div align="center">
-
 [![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](LICENCE.md)
-
-</div>
 
 ---
 
 ## How it works
 
 1. **Tell it about you** — target roles, skills, experience, target companies
-2. **It finds the right people** — searches LinkedIn for recruiters, hiring managers, and teams at your target companies
+2. **It finds the right people** — searches LinkedIn for recruiters and hiring managers
 3. **AI crafts messages** — personalized intros that start genuine conversations
-4. **You get interviews** — the bot handles the outreach, you focus on preparing
-
-The AI agent manages up to 4 messages per connection (intro → discuss → pitch → close). You can monitor all conversations from the web dashboard.
+4. **You get interviews** — the bot handles outreach, you focus on preparing
 
 ---
 
 ## What you need
 
-| # | What | Example |
-|---|------|---------|
-| 1 | **A LinkedIn account** | Your email + password |
-| 2 | **An LLM API key** | Groq (free), OpenAI, Anthropic |
-
-That's it. No lead lists, no CRM setup, no complex configuration.
+- **LinkedIn account** — email + password
+- **API key** — [Groq](https://console.groq.com/keys) (free) or [OpenAI](https://platform.openai.com/api-keys)
+- **Python 3** installed — [download](https://www.python.org/downloads/)
 
 ---
 
-## Quick Start (for dummies)
-
-### What you need
-- A **LinkedIn account** (email + password)
-- An **API key** from [Groq](https://console.groq.com/keys) (free) or [OpenAI](https://platform.openai.com/api-keys)
-- **Python 3** installed ([download](https://www.python.org/downloads/))
+## Quick Start
 
 ### 1. Download & install
+
 Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
 
 ```bash
@@ -47,111 +34,98 @@ Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
 git clone https://github.com/saswatasg/TGBhunt
 cd TGBhunt
 
-# Install everything (one command)
-pip3 install -r requirements.txt && pip3 install playwright && python3 -m playwright install chromium && python3 manage.py migrate
+# Install everything
+pip3 install -r requirements.txt
+pip3 install playwright
+python3 -m playwright install chromium
+python3 manage.py migrate
 ```
 
 ### 2. Start the setup wizard
+
 ```bash
 python3 manage.py runserver
 ```
 
-Your browser should open to **http://localhost:8000/** — if not, open that URL manually.
+Open **http://localhost:8000/** in your browser and complete the 3-step wizard.
 
-### 3. Complete the 3-step wizard
-1. **LinkedIn credentials** — your email + password, and your API key
-2. **Target roles** — what jobs you want (e.g. "Software Engineer, Product Manager")
-3. **Your story** — skills, target companies, achievements
+### 3. Start the bot
 
-### 4. Start the bot
-Back in the terminal, press **Ctrl+C** to stop the server, then run:
+Press **Ctrl+C** in the terminal, then run:
 
 ```bash
 python3 manage.py rundaemon
 ```
 
-The bot will:
-- Log into LinkedIn
-- Search for recruiters & hiring managers at your target companies
-- Send connection requests with AI-personalized messages
-- Follow up with people who accept
+The bot logs into LinkedIn, searches for relevant people, sends connection requests with AI-written messages, and follows up automatically.
 
-### 5. Check progress
-Open a **new terminal window** and run:
+### 4. Check progress
+
+Open a **second terminal window** and run:
 
 ```bash
 cd TGBhunt && python3 manage.py runserver
 ```
 
-Visit **http://localhost:8000/dashboard/job-hunt/** to see your connections and conversations.
+Visit **http://localhost:8000/dashboard/job-hunt/** to see your conversations.
 
-> **Pro tip:** Keep the daemon running 24/7 for best results. Data is saved — you can stop and restart anytime.
-
----
-
-## Project Structure
-
-```
-├── linkedin/
-│   ├── agents/              # AI agents (job hunt conversations)
-│   ├── browser/             # LinkedIn browser automation
-│   ├── daemon.py            # Task queue worker loop
-│   ├── jh_dashboard.py      # Job hunt web dashboard
-│   ├── jh_settings.py       # Django settings
-│   ├── jh_urls.py           # URL routing
-│   ├── models.py            # Campaign, JobHuntProfile, etc.
-│   ├── pipeline/            # Candidate search (job hunt pool)
-│   ├── tasks/               # Connect, follow-up, check pending
-│   └── views/jh_setup.py    # Setup wizard
-├── build.py                 # Build single executable (PyInstaller)
-├── jh_launcher.py           # Entry point for the executable
-├── manage.py                # Entry point (dev)
-└── README.md
-```
+> **Tip:** Keep the daemon running 24/7 for best results. Stop anytime with Ctrl+C — progress is saved.
 
 ---
 
-## Single Executable (for friends)
+## Commands cheat sheet
 
-You can build a standalone executable for macOS (no Python required):
-
-```bash
-# Install Playwright + Chromium first
-pip install playwright
-playwright install chromium
-
-# Build the executable
-python build.py
-
-# The executable is at dist/jh_assistant/jh_assistant (~205MB)
-# Your friends can run it directly — it starts a web server
-# and opens their browser to the setup wizard.
-```
-
-Windows/Linux builds: change `build.py` to match your platform's Chromium path, or build directly on the target OS.
+| What | Command |
+|------|---------|
+| Web UI | `python3 manage.py runserver` |
+| Start the bot | `python3 manage.py rundaemon` |
+| Apply DB changes | `python3 manage.py migrate` |
+| Create admin login | `python3 manage.py createsuperuser` |
 
 ---
 
 ## FAQ
 
 **Is this undetectable?**
-The bot uses Playwright with stealth plugins to mimic real user behavior. It respects LinkedIn's rate limits and operates within your daily connection limit.
+The bot uses Playwright with stealth plugins and respects LinkedIn's rate limits to minimize risk.
 
 **Can I get banned?**
-LinkedIn's ToS prohibit automation. Use at your own risk. Keep daily limits low (20 connects/day) and the bot uses human-like timing to minimize risk.
+LinkedIn's ToS prohibit automation. Use at your own risk. Keep daily limits low (20 connects/day).
 
-**What LLM providers are supported?**
-Groq, OpenAI, Anthropic, Google, Mistral, Cohere, or any OpenAI-compatible endpoint. Groq offers generous free tier access.
+**What AI providers work?**
+Groq (free tier), OpenAI, Anthropic, Google, Mistral, Cohere, or any OpenAI-compatible endpoint.
 
-**Does the bot apply to jobs for me?**
-No. It connects you with people (recruiters, hiring managers, team leads) so you can have conversations and find opportunities. You handle the actual interviews.
+**Does the bot apply to jobs?**
+No. It connects you with people (recruiters, hiring managers, team leads) so you can have conversations. You handle interviews.
+
+---
+
+## Project Structure
+
+```
+├── linkedin/          # Main Django app
+│   ├── agents/        # AI conversation agents
+│   ├── browser/       # LinkedIn browser automation
+│   ├── daemon.py      # Background task worker
+│   ├── jh_dashboard.py
+│   ├── jh_settings.py
+│   ├── jh_urls.py
+│   ├── models.py      # Campaign, JobHuntProfile
+│   ├── pipeline/      # Candidate search
+│   ├── tasks/         # Connect, follow-up, check pending
+│   └── views/         # Setup wizard
+├── crm/               # Lead & Deal models
+├── chat/              # Message models
+├── linkedin_cli/      # LinkedIn platform library
+├── manage.py          # Entry point
+├── setup.sh           # One-click install script
+├── build.py           # Build single executable
+├── requirements.txt
+└── README.md
+```
 
 ---
 
 ## License
 
-[GNU GPLv3](LICENCE.md)
-
-## Legal
-
-Not affiliated with LinkedIn. Use at your own risk — no liability assumed.
+[GNU GPLv3](LICENCE.md) — Not affiliated with LinkedIn. Use at your own risk.

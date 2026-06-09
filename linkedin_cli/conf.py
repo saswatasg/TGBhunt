@@ -1,7 +1,7 @@
 """Platform constants for the LinkedIn interaction layer.
 
 Browser timing/launch knobs and fixture paths — no campaign, CRM, or
-scheduling config (that stays in OpenOutreach's ``linkedin/conf.py``).
+scheduling config (that stays in ``linkedin/conf.py``).
 """
 from __future__ import annotations
 

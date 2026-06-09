@@ -7,7 +7,7 @@ Two ways to supply config:
 
 Both return an OnboardConfig; ``apply()`` is the single write path.
 
-NOTE: For TGBconnect, the web setup at /setup/ is the recommended path.
+NOTE: The web setup at /setup/ is the recommended path.
 The TTY wizard survives as a fallback for Docker-only users.
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ from linkedin.conf import (
 )
 
 DEFAULT_PRODUCT_DOCS = ROOT_DIR / "README.md"
-DEFAULT_CAMPAIGN_OBJECTIVE = ROOT_DIR / "docs" / "default_campaign.md"
+DEFAULT_CAMPAIGN_OBJECTIVE = ROOT_DIR / "README.md"
 
 logger = logging.getLogger(__name__)
 
@@ -100,24 +100,33 @@ def missing_keys() -> set[str]:
 # ---------------------------------------------------------------------------
 
 def collect_from_wizard() -> OnboardConfig:
-    """Run the questionary wizard for missing fields; return an OnboardConfig.
-
-    Raises SystemExit if the user cancels.
-    """
-    from openoutreach.prompts import SELF_HOSTED_QUESTIONS
-    from openoutreach.wizard import ask
-
+    """Simple TTY wizard for missing fields. Falls back to input() prompts."""
     skip = _ALL_KEYS - missing_keys()
-    questions = [q for q in SELF_HOSTED_QUESTIONS if q.key not in skip]
-    if not questions or not any(q.required for q in questions):
-        return OnboardConfig()
+    config = {}
 
-    answers = ask(questions)
-    if answers is None:
-        raise SystemExit("Onboarding cancelled.")
+    if "llm_api_key" not in skip:
+        print("\n── LLM API Key ──")
+        print("Get a free key from https://console.groq.com/keys")
+        config["llm_api_key"] = input("API key: ").strip()
+        provider = input("Provider (groq/openai/anthropic) [groq]: ").strip() or "groq"
+        config["llm_provider"] = provider
+        model = input("Model [llama-3.3-70b-versatile]: ").strip() or "llama-3.3-70b-versatile"
+        config["ai_model"] = model
+
+    if "linkedin_email" not in skip:
+        print("\n── LinkedIn Credentials ──")
+        config["linkedin_email"] = input("LinkedIn email: ").strip()
+        import getpass
+        config["linkedin_password"] = getpass.getpass("LinkedIn password: ")
+
+    if "campaign_name" not in skip:
+        print("\n── Campaign ──")
+        config["campaign_name"] = input("Campaign name [Job Hunt]: ").strip() or "Job Hunt"
+        config["campaign_objective"] = input("Campaign objective: ").strip()
+        config["product_description"] = input("Product description: ").strip()
 
     return OnboardConfig(**{
-        k: v for k, v in answers.items()
+        k: v for k, v in config.items()
         if k in OnboardConfig.__dataclass_fields__
     })
 

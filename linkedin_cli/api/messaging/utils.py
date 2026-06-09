@@ -15,10 +15,9 @@ def encode_urn(urn: str) -> str:
 
 def check_response(res, context: str) -> None:
     """Check a Voyager messaging API response, raising on errors."""
-    match res.status:
-        case 401:
-            raise AuthenticationError(f"Messaging API 401 ({context})")
-        case 403 | 404:
-            raise IOError(f"Messaging API {res.status} ({context})")
-    if not res.ok:
+    if res.status == 401:
+        raise AuthenticationError(f"Messaging API 401 ({context})")
+    elif res.status in (403, 404):
+        raise IOError(f"Messaging API {res.status} ({context})")
+    elif not res.ok:
         raise IOError(f"Messaging API {res.status} ({context}): {res.text()[:500]}")

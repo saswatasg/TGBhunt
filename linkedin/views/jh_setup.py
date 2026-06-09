@@ -2,10 +2,14 @@
 """Combined setup wizard for job-hunt-only mode.
 
 Collects LinkedIn credentials, LLM config, and job hunt profile
-in a single multi-step flow.
+in a single multi-step flow. Supports resume PDF upload + LLM parsing.
 """
 from __future__ import annotations
 
+import logging
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -15,9 +19,75 @@ from django.urls import path
 from linkedin.conf import DEFAULT_CONNECT_DAILY_LIMIT, DEFAULT_FOLLOW_UP_DAILY_LIMIT
 from linkedin.models import Campaign, JobHuntProfile, LinkedInProfile, SiteConfig
 
+logger = logging.getLogger(__name__)
+
 
 def _needs_setup() -> bool:
     return not JobHuntProfile.objects.exists()
+
+
+def _parse_resume_pdf(file_bytes: bytes, session=None) -> dict:
+    """Parse uploaded PDF and return structured data dict."""
+    from linkedin.resume_parser import (
+        cleanup_pdf,
+        extract_text_from_pdf,
+        parse_resume_with_llm,
+        save_uploaded_pdf,
+    )
+
+    data_root = Path(settings.DATABASES["default"]["NAME"]).parent
+    pdf_path = save_uploaded_pdf(file_bytes, data_root)
+    if not pdf_path:
+        return {}
+
+    raw_text = extract_text_from_pdf(str(pdf_path))
+    cleanup_pdf(pdf_path)
+
+    if not raw_text:
+        return {}
+
+    llm_kwargs = {}
+    if session:
+        llm_kwargs = {
+            "llm_provider": session.get("jh_llm_provider"),
+            "llm_api_key": session.get("jh_llm_api_key"),
+            "ai_model": session.get("jh_llm_model"),
+        }
+    result = parse_resume_with_llm(raw_text, **llm_kwargs)
+    result["_resume_text"] = raw_text
+    return result
+
+
+def _fill_session_from_parsed(session, parsed: dict) -> None:
+    """Pre-fill session with parsed resume data (only non-empty values)."""
+    mapping = {
+        "jh_target_roles": "target_roles",
+        "jh_current_role": "current_role",
+        "jh_years_experience": "years_experience",
+        "jh_skills": "skills",
+        "jh_education": "education",
+        "jh_achievements": "achievements",
+        "jh_standout_points": "standout_points",
+        "jh_target_companies": "target_companies",
+        "jh_target_locations": "target_locations",
+        "jh_company": "current_company",
+        "jh_resume_text": "_resume_text",
+    }
+    for session_key, parse_key in mapping.items():
+        val = parsed.get(parse_key)
+        if val not in (None, "", [], {}):
+            session[session_key] = val
+
+
+def _render_step(request, step, extra=None):
+    ctx = {
+        "step": step,
+        "total_steps": 3,
+        "provider_choices": SiteConfig.LLMProvider.choices,
+    }
+    if extra:
+        ctx.update(extra)
+    return render(request, "setup/jh_setup.html", ctx)
 
 
 def setup_wizard(request):
@@ -25,11 +95,7 @@ def setup_wizard(request):
         return redirect("/dashboard/job-hunt/")
 
     if request.method == "GET":
-        return render(request, "setup/jh_setup.html", {
-            "step": 1,
-            "total_steps": 3,
-            "provider_choices": SiteConfig.LLMProvider.choices,
-        })
+        return _render_step(request, 1)
 
     step = int(request.POST.get("step", 1))
 
@@ -48,11 +114,7 @@ def setup_wizard(request):
         if not llm_api_key:
             errors["llm_api_key"] = "LLM API key is required."
         if errors:
-            return render(request, "setup/jh_setup.html", {
-                "step": 1, "total_steps": 3,
-                "errors": errors, "values": request.POST,
-                "provider_choices": SiteConfig.LLMProvider.choices,
-            })
+            return _render_step(request, 1, {"errors": errors, "values": request.POST})
 
         request.session["jh_linkedin_email"] = linkedin_email
         request.session["jh_linkedin_password"] = linkedin_password
@@ -60,25 +122,41 @@ def setup_wizard(request):
         request.session["jh_llm_model"] = llm_model or "llama-3.3-70b-versatile"
         request.session["jh_llm_api_key"] = llm_api_key
 
-        return render(request, "setup/jh_setup.html", {
-            "step": 2, "total_steps": 3,
-            "provider_choices": SiteConfig.LLMProvider.choices,
-        })
+        return _render_step(request, 2)
 
     elif step == 2:
-        target_roles = [r.strip() for r in request.POST.get("target_roles", "").split(",") if r.strip()]
-        resume_url = request.POST.get("resume_url", "").strip()
-        current_role = request.POST.get("current_role", "").strip()
-        years_exp = request.POST.get("years_experience", "").strip()
-        skills = request.POST.get("skills", "").strip()
+        has_pdf = bool(request.FILES.get("resume_pdf"))
 
+        if has_pdf:
+            pdf_file = request.FILES["resume_pdf"]
+            if not pdf_file.name.lower().endswith(".pdf"):
+                return _render_step(request, 2, {
+                    "errors": {"resume_pdf": "File must be a PDF."},
+                    "values": request.POST,
+                })
+
+            parsed = _parse_resume_pdf(pdf_file.read(), request.session)
+            if parsed:
+                _fill_session_from_parsed(request.session, parsed)
+                logger.info("Resume parsed: %d fields extracted", len(parsed))
+            else:
+                logger.warning("Resume parsing failed — falling back to manual entry")
+
+        target_roles = [r.strip() for r in request.POST.get("target_roles", "").split(",") if r.strip()]
         if not target_roles:
-            return render(request, "setup/jh_setup.html", {
-                "step": 2, "total_steps": 3,
-                "errors": {"target_roles": "At least one target role is required."},
-                "values": request.POST,
-                "provider_choices": SiteConfig.LLMProvider.choices,
-            })
+            existing = request.session.get("jh_target_roles", [])
+            if isinstance(existing, list) and existing:
+                target_roles = existing
+            else:
+                errors = {"target_roles": "At least one target role is required."}
+                if has_pdf:
+                    errors["resume_pdf"] = "Could not extract target roles from PDF — enter them manually."
+                return _render_step(request, 2, {"errors": errors, "values": request.POST})
+
+        resume_url = request.POST.get("resume_url", "").strip()
+        current_role = request.POST.get("current_role", "").strip() or request.session.get("jh_current_role", "")
+        years_exp = request.POST.get("years_experience", "").strip() or request.session.get("jh_years_experience", "")
+        skills = request.POST.get("skills", "").strip() or request.session.get("jh_skills", "")
 
         request.session["jh_target_roles"] = target_roles
         request.session["jh_resume_url"] = resume_url
@@ -86,21 +164,26 @@ def setup_wizard(request):
         request.session["jh_years_experience"] = years_exp
         request.session["jh_skills"] = skills
 
-        return render(request, "setup/jh_setup.html", {
-            "step": 3, "total_steps": 3,
-            "provider_choices": SiteConfig.LLMProvider.choices,
-        })
+        return _render_step(request, 3)
 
     elif step == 3:
-        request.session["jh_achievements"] = request.POST.get("achievements", "").strip()
-        request.session["jh_standout_points"] = request.POST.get("standout_points", "").strip()
-        request.session["jh_education"] = request.POST.get("education", "").strip()
-        request.session["jh_company"] = request.POST.get("current_company", "").strip()
-        target_companies = [c.strip() for c in request.POST.get("target_companies", "").split(",") if c.strip()]
-        target_locations = [l.strip() for l in request.POST.get("target_locations", "").split(",") if l.strip()]
+        request.session["jh_achievements"] = request.POST.get("achievements", "").strip() or request.session.get("jh_achievements", "")
+        request.session["jh_standout_points"] = request.POST.get("standout_points", "").strip() or request.session.get("jh_standout_points", "")
+        request.session["jh_education"] = request.POST.get("education", "").strip() or request.session.get("jh_education", "")
+        request.session["jh_company"] = request.POST.get("current_company", "").strip() or request.session.get("jh_company", "")
+        target_companies_str = request.POST.get("target_companies", "").strip()
+        if target_companies_str:
+            target_companies = [c.strip() for c in target_companies_str.split(",") if c.strip()]
+        else:
+            target_companies = request.session.get("jh_target_companies", [])
+        target_locations_str = request.POST.get("target_locations", "").strip()
+        if target_locations_str:
+            target_locations = [l.strip() for l in target_locations_str.split(",") if l.strip()]
+        else:
+            target_locations = request.session.get("jh_target_locations", [])
         request.session["jh_target_companies"] = target_companies
         request.session["jh_target_locations"] = target_locations
-        request.session["jh_additional_context"] = request.POST.get("additional_context", "").strip()
+        request.session["jh_additional_context"] = request.POST.get("additional_context", "").strip() or request.session.get("jh_additional_context", "")
 
         try:
             with transaction.atomic():
@@ -152,6 +235,7 @@ def setup_wizard(request):
                     education=request.session.get("jh_education", ""),
                     achievements=request.session.get("jh_achievements", ""),
                     additional_context=request.session.get("jh_additional_context", ""),
+                    resume_text=request.session.get("jh_resume_text", ""),
                 )
 
             auth_login(request, user)
@@ -165,11 +249,9 @@ def setup_wizard(request):
             return render(request, "setup/jh_success.html", {"temp_password": temp_password})
 
         except Exception as e:
-            return render(request, "setup/jh_setup.html", {
-                "step": 3, "total_steps": 3,
+            return _render_step(request, 3, {
                 "errors": {"__all__": f"Setup failed: {e}"},
                 "values": request.POST,
-                "provider_choices": SiteConfig.LLMProvider.choices,
             })
 
     return redirect("/setup/")

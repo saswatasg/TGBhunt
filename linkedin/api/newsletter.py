@@ -16,7 +16,7 @@ BREVO_FORM_URL = (
 
 def subscribe_to_newsletter(email: str, linkedin: str | None = None) -> bool:
     """
-    Subscribe email to OpenOutreach newsletter via Brevo form.
+    Subscribe email to newsletter via Brevo form.
     Returns True if successful or already subscribed.
     """
     data = {
@@ -62,7 +62,7 @@ def subscribe_to_newsletter(email: str, linkedin: str | None = None) -> bool:
 
 
 def ensure_newsletter_subscription(session: AccountSession, linkedin_url: str | None = None):
-    """Subscribe the account to the OpenOutreach newsletter if enabled."""
+    """Subscribe the account to the newsletter if enabled."""
     lp = session.linkedin_profile
 
     if not lp.subscribe_newsletter:
@@ -74,5 +74,5 @@ def ensure_newsletter_subscription(session: AccountSession, linkedin_url: str | 
         logger.warning("No valid email for newsletter: %s", session)
         return
 
-    logger.debug("Subscribing %s to OpenOutreach newsletter...", email)
+    logger.debug("Subscribing %s to newsletter...", email)
     subscribe_to_newsletter(email, linkedin=linkedin_url)

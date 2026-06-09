@@ -1,7 +1,7 @@
-# local.yml — TGBconnect Docker Compose
+# local.yml — Docker Compose
 # Two services:
 #   app:   LinkedIn automation daemon + VNC (:6080)
-#   admin: Django admin + sales dashboard (:8000)
+#   admin: Django admin + dashboard (:8000)
 
 services:
   app:
