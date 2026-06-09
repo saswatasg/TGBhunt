@@ -6,9 +6,16 @@ from pathlib import Path
 
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+# Data directory: env var wins, otherwise next to executable (frozen) or project root (dev)
+_data_env = os.environ.get("JH_DATA_DIR")
+if _data_env:
+    _data_root = Path(_data_env)
+elif getattr(sys, "frozen", False):
+    _data_root = Path(sys.executable).parent / "jh_data"
+else:
+    _data_root = Path(__file__).resolve().parent.parent / "data"
+_data_root.mkdir(parents=True, exist_ok=True)
 
-BASE_DIR = ROOT_DIR
 SECRET_KEY = "jh-local-dev-key-change-in-production"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
@@ -58,16 +65,16 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": str(ROOT_DIR / "data" / "db.sqlite3"),
+        "NAME": str(_data_root / "db.sqlite3"),
     }
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SITE_ID = 1
 STATIC_URL = "/static/"
-STATIC_ROOT = ROOT_DIR / "staticfiles"
+STATIC_ROOT = _data_root / "staticfiles"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = ROOT_DIR / "media"
+MEDIA_ROOT = _data_root / "media"
 LOGIN_URL = "/admin/login/"
 DEFAULT_FROM_EMAIL = "noreply@localhost"
 EMAIL_SUBJECT_PREFIX = "JH: "
