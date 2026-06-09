@@ -102,9 +102,32 @@ Visit **http://localhost:8000/dashboard/job-hunt/** to see your progress.
 │   ├── pipeline/            # Candidate search (job hunt pool)
 │   ├── tasks/               # Connect, follow-up, check pending
 │   └── views/jh_setup.py    # Setup wizard
-├── manage.py                # Entry point
+├── build.py                 # Build single executable (PyInstaller)
+├── jh_launcher.py           # Entry point for the executable
+├── manage.py                # Entry point (dev)
 └── README.md
 ```
+
+---
+
+## Single Executable (for friends)
+
+You can build a standalone executable for macOS (no Python required):
+
+```bash
+# Install Playwright + Chromium first
+pip install playwright
+playwright install chromium
+
+# Build the executable
+python build.py
+
+# The executable is at dist/jh_assistant/jh_assistant (~205MB)
+# Your friends can run it directly — it starts a web server
+# and opens their browser to the setup wizard.
+```
+
+Windows/Linux builds: change `build.py` to match your platform's Chromium path, or build directly on the target OS.
 
 ---
 
