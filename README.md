@@ -32,59 +32,60 @@ That's it. No lead lists, no CRM setup, no complex configuration.
 
 ---
 
-## Quick Start
+## Quick Start (for dummies)
 
-### Prerequisites
+### What you need
+- A **LinkedIn account** (email + password)
+- An **API key** from [Groq](https://console.groq.com/keys) (free) or [OpenAI](https://platform.openai.com/api-keys)
+- **Python 3** installed ([download](https://www.python.org/downloads/))
 
-- Python 3.9+
-- [Playwright browsers](https://playwright.dev/python/docs/install)
-
-### Setup
-
-```bash
-# Clone the repo
-git clone <your-repo-url>
-cd TGBconnect
-
-# Install dependencies
-pip install django scikit-learn scipy jinja2 pydantic pydantic-ai termcolor
-
-# Install Playwright browsers
-playwright install chromium
-
-# Run migrations
-python manage.py migrate
-
-# Start the web setup
-python manage.py runserver
-```
-
-Open **http://localhost:8000/** in your browser and complete the 3-step setup wizard:
-
-1. **LinkedIn credentials + AI provider** — your login and LLM API key
-2. **Target roles** — what jobs you want (e.g., "Senior Software Engineer, Engineering Manager")
-3. **Your story** — achievements, skills, target companies, resume link
-
-### Run the daemon
-
-Once setup is complete:
+### 1. Download & install
+Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
 
 ```bash
-# Start the automation daemon
-python manage.py rundaemon
+# Download the code
+git clone https://github.com/saswatasg/TGBhunt
+cd TGBhunt
+
+# Install everything (one command)
+pip3 install -r requirements.txt && pip3 install playwright && python3 -m playwright install chromium && python3 manage.py migrate
 ```
 
-The daemon logs into LinkedIn, starts finding relevant people, sends connection requests, and manages follow-up conversations.
+### 2. Start the setup wizard
+```bash
+python3 manage.py runserver
+```
 
-### View your dashboard
+Your browser should open to **http://localhost:8000/** — if not, open that URL manually.
 
-Keep the web UI running in another terminal:
+### 3. Complete the 3-step wizard
+1. **LinkedIn credentials** — your email + password, and your API key
+2. **Target roles** — what jobs you want (e.g. "Software Engineer, Product Manager")
+3. **Your story** — skills, target companies, achievements
+
+### 4. Start the bot
+Back in the terminal, press **Ctrl+C** to stop the server, then run:
 
 ```bash
-python manage.py runserver
+python3 manage.py rundaemon
 ```
 
-Visit **http://localhost:8000/dashboard/job-hunt/** to see your progress.
+The bot will:
+- Log into LinkedIn
+- Search for recruiters & hiring managers at your target companies
+- Send connection requests with AI-personalized messages
+- Follow up with people who accept
+
+### 5. Check progress
+Open a **new terminal window** and run:
+
+```bash
+cd TGBhunt && python3 manage.py runserver
+```
+
+Visit **http://localhost:8000/dashboard/job-hunt/** to see your connections and conversations.
+
+> **Pro tip:** Keep the daemon running 24/7 for best results. Data is saved — you can stop and restart anytime.
 
 ---
 
