@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/actions/conversations.py
 """Retrieve past LinkedIn conversations for a given profile."""
 import logging

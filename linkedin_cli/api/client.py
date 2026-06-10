@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/api/client.py
 import json
 import logging

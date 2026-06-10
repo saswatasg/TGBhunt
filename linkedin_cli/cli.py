@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """linkedin-cli — drive LinkedIn interactions inside a bound browser session.
 
 ``session open`` launches + binds a persistent browser (the session owner); the
@@ -8,7 +10,6 @@ with ``--session <name>``.
 This module is the composition root: it owns policy (e.g. interaction pacing)
 and injects it into the session — the session/action layers read no config.
 """
-from __future__ import annotations
 
 import argparse
 import json

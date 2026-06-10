@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """LLM model factory + sync boundary for pydantic-ai.
 
 Two public entry points:
@@ -25,7 +27,6 @@ A single long-lived loop on a dedicated thread eliminates both: all HTTP
 clients live on the same loop forever, and the runner thread's asyncio
 slot stays inside this module — the caller thread is never touched.
 """
-from __future__ import annotations
 
 import asyncio
 import threading

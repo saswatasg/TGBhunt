@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/tz_detect.py
 """System timezone detection for the active-hours daemon schedule.
 
@@ -6,7 +8,6 @@ None. `system_timezone()` tries them in order and validates each
 candidate against the tzdata database; falls back to "UTC" on exotic
 systems.
 """
-from __future__ import annotations
 
 import os
 from datetime import datetime

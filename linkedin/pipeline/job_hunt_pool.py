@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/pipeline/job_hunt_pool.py
 """Job hunt candidate pool — finds relevant people to connect with.
 
@@ -6,7 +8,6 @@ Searches LinkedIn for people relevant to the user's target roles:
 - People in similar roles at target companies
 - People with titles matching the target role
 """
-from __future__ import annotations
 
 import logging
 import random

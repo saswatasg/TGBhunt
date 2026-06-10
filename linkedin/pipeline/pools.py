@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/pipeline/pools.py
 """Pool management via composable generators.
 
@@ -15,7 +17,6 @@ Three generators chain via next(upstream, None):
 Each qualify_source iteration produces exactly one label, which shifts the GP
 model — preventing the infinite-search-without-qualifying bug.
 """
-from __future__ import annotations
 
 import logging
 from typing import Generator

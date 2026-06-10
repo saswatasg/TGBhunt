@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import Dict, Any
 from urllib.parse import urlparse, parse_qs, urlencode

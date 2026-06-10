@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/agents/job_hunt.py
 """Job Hunt agent: reads conversation, returns a structured decision.
 
@@ -5,7 +7,6 @@ Single LLM call with structured output — no tool-calling loop.
 The handler in tasks/follow_up.py executes the decision when
 campaign.is_job_hunt is True.
 """
-from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta

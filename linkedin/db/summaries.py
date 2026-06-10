@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """mem0-style fact-list summaries for Deal profile and chat history.
 
 Single LLM boundary for the lazy summary pipeline. Summaries are stored as
@@ -6,7 +8,6 @@ campaign-scoped derived caches: deleting them and re-running the lazy path
 rebuilds them from source (a Voyager re-scrape for `profile_summary`,
 `ChatMessage` rows for `chat_summary`).
 """
-from __future__ import annotations
 
 import json
 import logging

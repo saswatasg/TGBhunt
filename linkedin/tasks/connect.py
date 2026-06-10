@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # linkedin/tasks/connect.py
 """Connect task — resolves one candidate from the campaign pool and acts.
 
@@ -5,7 +7,6 @@ Lazy: the task payload carries only ``campaign_id``. The handler picks
 its candidate at execution time via the campaign's ``ConnectStrategy``.
 No self-rescheduling — pacing is owned by ``tasks/scheduler.py``.
 """
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

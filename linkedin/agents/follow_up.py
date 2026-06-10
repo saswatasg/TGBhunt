@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 # linkedin/agents/follow_up.py
 """Follow-up agent: reads conversation, returns a structured decision.
 
 Single LLM call with structured output — no tool-calling loop.
 The handler in tasks/follow_up.py executes the decision.
 """
-from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta

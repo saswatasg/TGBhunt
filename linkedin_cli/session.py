@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """The session contract every linkedin_cli verb runs against.
 
 linkedin_cli owns no browser lifecycle and no persistence. Each verb is handed
@@ -9,7 +11,6 @@ the standalone CLI backs it with a Playwright CLI session adapter.
 ``LinkedInSession`` is the typed boundary between the two — it lists exactly what
 the platform code touches, and nothing about campaigns, leads, or the DB.
 """
-from __future__ import annotations
 
 import json
 import logging
