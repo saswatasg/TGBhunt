@@ -15,72 +15,47 @@
 
 ---
 
+## Download & Run
+
+[Download the latest release](https://github.com/saswatasg/TGBhunt/releases/latest)
+
+1. Download `jh-assistant-macos.zip`
+2. Unzip → double-click `JH Assistant.app`
+3. Browser opens — complete the 3-step wizard
+4. Click **Start** on the dashboard
+5. Done — the bot runs silently in the background
+
+**No terminal. No Python. No setup.**
+
+---
+
 ## What you need
 
 - **LinkedIn account** — email + password
 - **API key** — [Groq](https://console.groq.com/keys) (free) or [OpenAI](https://platform.openai.com/api-keys)
-- **Python 3** installed — [download](https://www.python.org/downloads/)
 
 ---
 
-## Quick Start
+## For developers
 
-### 1. Download & install
-
-Open **Terminal** (Mac) or **Command Prompt** (Windows) and paste:
+Clone the repo and run from source:
 
 ```bash
-# Download the code
 git clone https://github.com/saswatasg/TGBhunt
 cd TGBhunt
-
-# Install everything
 pip3 install -r requirements.txt
 pip3 install playwright
 python3 -m playwright install chromium
 python3 manage.py migrate
-```
-
-### 2. Start the setup wizard
-
-```bash
 python3 manage.py runserver
 ```
 
-Open **http://localhost:8000/** in your browser and complete the 3-step wizard.
-
-### 3. Start the bot
-
-Press **Ctrl+C** in the terminal, then run:
-
-```bash
-python3 manage.py rundaemon
-```
-
-The bot logs into LinkedIn, searches for relevant people, sends connection requests with AI-written messages, and follows up automatically.
-
-### 4. Check progress
-
-Open a **second terminal window** and run:
-
-```bash
-cd TGBhunt && python3 manage.py runserver
-```
-
-Visit **http://localhost:8000/dashboard/job-hunt/** to see your conversations.
-
-> **Tip:** Keep the daemon running 24/7 for best results. Stop anytime with Ctrl+C — progress is saved.
-
----
-
-## Commands cheat sheet
-
-| What | Command |
-|------|---------|
-| Web UI | `python3 manage.py runserver` |
-| Start the bot | `python3 manage.py rundaemon` |
-| Apply DB changes | `python3 manage.py migrate` |
-| Create admin login | `python3 manage.py createsuperuser` |
+| Command | What |
+|---------|------|
+| `python3 manage.py runserver` | Web UI |
+| `python3 manage.py rundaemon` | Start bot |
+| `python3 manage.py migrate` | Apply DB changes |
+| `python build.py` | Build executable |
 
 ---
 

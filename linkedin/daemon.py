@@ -90,13 +90,18 @@ class Heartbeat:
         logger.info(colored("alive", "cyan") + " — %s", context)
 
 
-def sleep_with_heartbeat(seconds: float, heartbeat: Heartbeat, context: str) -> None:
+def sleep_with_heartbeat(seconds: float, heartbeat: Heartbeat, context: str,
+                         stop_event: threading.Event | None = None) -> None:
     """``time.sleep(seconds)`` that wakes every ``HEARTBEAT_SLICE`` seconds to
     let *heartbeat* fire. Use for any idle sleep longer than the heartbeat
     interval so the daemon never goes silent for more than 5 minutes.
+
+    If *stop_event* is provided, returns early when it is set.
     """
     end = time.monotonic() + seconds
     while True:
+        if stop_event and stop_event.is_set():
+            return
         remaining = end - time.monotonic()
         if remaining <= 0:
             return
@@ -224,7 +229,7 @@ def _exit_on_checkpoint(session, task, url: str) -> None:
 # ------------------------------------------------------------------
 
 
-def run_daemon(session):
+def run_daemon(session, stop_event: threading.Event | None = None):
     from linkedin.models import Campaign
 
     cfg = CAMPAIGN_CONFIG
@@ -249,13 +254,20 @@ def run_daemon(session):
     # Single-threaded: one task at a time, no concurrent enqueuing,
     # so sleeping until the next scheduled_at is safe.
     while True:
+        if stop_event and stop_event.is_set():
+            logger.info("Daemon stop requested — exiting")
+            return
+
         pause = seconds_until_active()
         if pause > 0:
             h, m = int(pause // 3600), int(pause % 3600 // 60)
             logger.info("Outside active hours — sleeping %dh%02dm", h, m)
             sleep_with_heartbeat(
                 pause, heartbeat, f"outside active hours, {h}h{m:02d}m left",
+                stop_event=stop_event,
             )
+            if stop_event and stop_event.is_set():
+                return
             rhythm.reset()
             continue
 
@@ -270,7 +282,9 @@ def run_daemon(session):
             wait = Task.objects.seconds_to_next()
             if wait is None:
                 logger.info("Queue empty after reconcile — sleeping 1h")
-                sleep_with_heartbeat(3600, heartbeat, "queue empty")
+                sleep_with_heartbeat(3600, heartbeat, "queue empty", stop_event=stop_event)
+                if stop_event and stop_event.is_set():
+                    return
                 rhythm.reset()
                 continue
             if wait > 0:
@@ -278,7 +292,10 @@ def run_daemon(session):
                 logger.info("Next task in %dh%02dm — sleeping", h, m)
                 sleep_with_heartbeat(
                     wait, heartbeat, f"next task in {h}h{m:02d}m",
+                    stop_event=stop_event,
                 )
+                if stop_event and stop_event.is_set():
+                    return
                 rhythm.reset()
             continue
 

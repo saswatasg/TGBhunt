@@ -145,7 +145,7 @@ a = Analysis(
     ],
     hookspath=[],
     hooksconfig={{}},
-    excludes=['tkinter', 'matplotlib', 'PIL', 'cv2', 'tensorflow', 'torch'],
+    excludes=['tkinter', 'matplotlib', 'PIL', 'cv2', 'tensorflow', 'torch', 'PyQt5'],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
@@ -163,7 +163,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

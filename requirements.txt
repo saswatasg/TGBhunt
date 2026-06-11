@@ -19,3 +19,4 @@ joblib
 huggingface_hub
 requests
 pymupdf
+rumps

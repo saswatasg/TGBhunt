@@ -91,7 +91,6 @@ def _create_lead_and_deal(session, public_id: str, profile_data: dict | None = N
 def find_job_hunt_candidate(session, campaign) -> dict | None:
     """Find one person relevant to the job hunt to connect with."""
     from linkedin_cli.actions.search import search_people
-    from linkedin_cli.api.client import enrich_profile
 
     jhp = getattr(campaign, "job_hunt_profile", None)
     if not jhp:

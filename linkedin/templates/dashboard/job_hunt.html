@@ -43,6 +43,8 @@
   .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
   .tab { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; background: #f0f0f0; color: #555; border: none; text-decoration: none; }
   .tab.active { background: #0a66c2; color: #fff; }
+  .daemon-bar { background: #fff; border-radius: 8px; padding: 14px 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); display: flex; align-items: center; gap: 12px; }
+  .daemon-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -62,6 +64,12 @@
     <a href="/setup/job-hunt/1/" class="btn">Set Up Job Hunt</a>
   </div>
   {% else %}
+  <div class="daemon-bar">
+    <span class="daemon-dot" id="daemon-dot" style="background:#ccc;"></span>
+    <span id="daemon-label" style="font-size:14px;color:#666;">Automation — checking...</span>
+    <button id="daemon-btn" class="btn btn-primary" style="margin-left:auto;padding:8px 20px;font-size:13px;">Start</button>
+  </div>
+
   <div class="header">
     <h1>Your Job Hunt</h1>
     <p>Targeting: <strong>{{ profile.target_roles|join:", " }}</strong>
@@ -115,5 +123,42 @@
   {% endif %}
   {% endif %}
 </div>
+
+<script>
+async function checkDaemon(){
+  try {
+    const r = await fetch('/api/daemon/status');
+    const d = await r.json();
+    const dot = document.getElementById('daemon-dot');
+    const label = document.getElementById('daemon-label');
+    const btn = document.getElementById('daemon-btn');
+    if(d.running){
+      dot.style.background = '#4caf50';
+      label.textContent = 'Automation running';
+      label.style.color = '#2e7d32';
+      btn.textContent = 'Stop';
+      btn.className = 'btn btn-secondary';
+    } else {
+      dot.style.background = '#ccc';
+      label.textContent = 'Automation stopped';
+      label.style.color = '#666';
+      btn.textContent = 'Start';
+      btn.className = 'btn btn-primary';
+    }
+  } catch(e){}
+}
+document.addEventListener('DOMContentLoaded', function(){
+  checkDaemon();
+  document.getElementById('daemon-btn').addEventListener('click', async function(){
+    const btn = document.getElementById('daemon-btn');
+    const wasRunning = btn.textContent === 'Stop';
+    try {
+      await fetch('/api/daemon/' + (wasRunning ? 'stop' : 'start'), {method:'POST'});
+    } catch(e){}
+    await checkDaemon();
+  });
+  setInterval(checkDaemon, 5000);
+});
+</script>
 </body>
 </html>
