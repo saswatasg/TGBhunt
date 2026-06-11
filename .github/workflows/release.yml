@@ -29,11 +29,7 @@ jobs:
         run: |
           APP="dist/JH Assistant.app"
           mkdir -p "$APP/Contents/MacOS"
-          if [ -d dist/jh_assistant ]; then
-            cp -r dist/jh_assistant/* "$APP/Contents/MacOS/"
-          else
-            cp dist/jh_assistant "$APP/Contents/MacOS/jh_assistant"
-          fi
+          cp dist/jh_assistant "$APP/Contents/MacOS/jh_assistant"
           cat > "$APP/Contents/Info.plist" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

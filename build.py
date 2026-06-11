@@ -170,16 +170,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='jh_assistant',
+    contents_directory='.',
 )
 """
     SPEC_FILE.write_text(spec)
@@ -219,17 +210,17 @@ def main():
         print("Build failed!")
         sys.exit(1)
 
-    exe_path = DIST_DIR / "jh_assistant" / "jh_assistant"
+    exe_path = DIST_DIR / "jh_assistant"
     if sys.platform == "win32":
         exe_path = exe_path.with_suffix(".exe")
     if exe_path.exists():
-        size_mb = sum(f.stat().st_size for f in exe_path.parent.rglob("*") if f.is_file()) / 1024 / 1024
+        size_mb = exe_path.stat().st_size / 1024 / 1024
         print(f"\nExecutable built: {exe_path}")
-        print(f"Directory size: {size_mb:.1f} MB")
+        print(f"Size: {size_mb:.1f} MB")
     else:
         print("Build completed but executable not found at expected path.")
 
-    print("\nTo distribute, zip the entire dist/jh_assistant/ directory.")
+    print("\nTo distribute, zip the entire dist/jh_assistant directory.")
 
 
 if __name__ == "__main__":
