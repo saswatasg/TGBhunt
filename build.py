@@ -38,6 +38,7 @@ def find_chromium():
         for p in [
             Path.home() / ".cache/ms-playwright",
             Path.home() / "AppData/Local/ms-playwright",
+            Path.home() / "Library/Caches/ms-playwright",
         ]:
             if p.exists():
                 for d in sorted(p.iterdir(), reverse=True):
@@ -169,7 +170,16 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    contents_directory='.',
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='jh_assistant',
 )
 """
     SPEC_FILE.write_text(spec)
@@ -213,8 +223,9 @@ def main():
     if sys.platform == "win32":
         exe_path = exe_path.with_suffix(".exe")
     if exe_path.exists():
+        size_mb = sum(f.stat().st_size for f in exe_path.parent.rglob("*") if f.is_file()) / 1024 / 1024
         print(f"\nExecutable built: {exe_path}")
-        print(f"Size: {exe_path.stat().st_size / 1024 / 1024:.1f} MB")
+        print(f"Directory size: {size_mb:.1f} MB")
     else:
         print("Build completed but executable not found at expected path.")
 
