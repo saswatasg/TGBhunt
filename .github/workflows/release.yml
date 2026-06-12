@@ -33,20 +33,23 @@ jobs:
           APP="dist/JH Assistant.app"
           mkdir -p "$APP/Contents/MacOS"
           cp dist/jh_assistant "$APP/Contents/MacOS/jh_assistant"
-          cat > "$APP/Contents/Info.plist" << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>CFBundleExecutable</key><string>jh_assistant</string>
-            <key>CFBundleIdentifier</key><string>com.jobhunt.assistant</string>
-            <key>CFBundleName</key><string>JH Assistant</string>
-            <key>CFBundleVersion</key><string>${{ github.ref_name }}</string>
-            <key>CFBundleShortVersionString</key><string>${{ github.ref_name }}</string>
-            <key>LSUIElement</key><true/>
-          </dict>
-          </plist>
-          EOF
+          chmod +x "$APP/Contents/MacOS/jh_assistant"
+          python3 -c "
+          import os, plistlib
+          ref = os.environ['GITHUB_REF_NAME']
+          plistlib.dump({
+              'CFBundleExecutable': 'jh_assistant',
+              'CFBundleIdentifier': 'com.jobhunt.assistant',
+              'CFBundleInfoDictionaryVersion': '6.0',
+              'CFBundleName': 'JH Assistant',
+              'CFBundlePackageType': 'APPL',
+              'CFBundleShortVersionString': ref,
+              'CFBundleVersion': ref,
+              'LSUIElement': True,
+              'NSHighResolutionCapable': True,
+          }, open(os.path.join(os.environ['APP'], 'Contents', 'Info.plist'), 'wb'))
+          "
+          codesign --force --deep --sign - "$APP"
 
       - name: Zip .app
         run: |
