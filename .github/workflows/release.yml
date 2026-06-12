@@ -30,13 +30,14 @@ jobs:
 
       - name: Bundle as .app
         run: |
-          APP="dist/JH Assistant.app"
+          export APP="dist/JH Assistant.app"
           mkdir -p "$APP/Contents/MacOS"
           cp dist/jh_assistant "$APP/Contents/MacOS/jh_assistant"
           chmod +x "$APP/Contents/MacOS/jh_assistant"
           python3 -c "
           import os, plistlib
           ref = os.environ['GITHUB_REF_NAME']
+          app = os.environ['APP']
           plistlib.dump({
               'CFBundleExecutable': 'jh_assistant',
               'CFBundleIdentifier': 'com.jobhunt.assistant',
@@ -47,7 +48,7 @@ jobs:
               'CFBundleVersion': ref,
               'LSUIElement': True,
               'NSHighResolutionCapable': True,
-          }, open(os.path.join(os.environ['APP'], 'Contents', 'Info.plist'), 'wb'))
+          }, open(os.path.join(app, 'Contents', 'Info.plist'), 'wb'))
           "
           codesign --force --deep --sign - "$APP"
 
