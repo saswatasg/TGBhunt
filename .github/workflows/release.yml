@@ -46,7 +46,6 @@ jobs:
               'CFBundlePackageType': 'APPL',
               'CFBundleShortVersionString': ref,
               'CFBundleVersion': ref,
-              'LSUIElement': True,
               'NSHighResolutionCapable': True,
           }, open(os.path.join(app, 'Contents', 'Info.plist'), 'wb'))
           "

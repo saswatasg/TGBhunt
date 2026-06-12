@@ -20,3 +20,4 @@ huggingface_hub
 requests
 pymupdf
 rumps
+pyobjc-framework-Cocoa

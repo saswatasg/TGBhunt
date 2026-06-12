@@ -57,50 +57,48 @@ def main():
         except Exception:
             time.sleep(1)
 
-    # ── Menu bar icon (rumps) ──
-    import rumps
-    from linkedin.daemon_controller import (
-        is_running as daemon_running,
-        start as daemon_start,
-        stop as daemon_stop,
-    )
-
-    app = rumps.App("JH Assistant", title="🧠")
-    _start_item = rumps.MenuItem("Start Automation")
-
-    def _open_dashboard(_):
-        import webbrowser
-        webbrowser.open(f"{url}dashboard/job-hunt/")
-
-    def _toggle_daemon(_):
-        if daemon_running():
-            daemon_stop()
-            _start_item.title = "Start Automation"
-        else:
-            daemon_start()
-            _start_item.title = "Stop Automation"
-
-    _start_item.set_callback(_toggle_daemon)
-
-    def _quit(_):
-        daemon_stop()
-        time.sleep(0.5)
-        rumps.quit_application()
-
-    app.menu = [
-        rumps.MenuItem("Open Dashboard", callback=_open_dashboard),
-        None,
-        _start_item,
-        None,
-        rumps.MenuItem("Quit", callback=_quit),
-    ]
-
     # ── Open browser ──
     import webbrowser
     webbrowser.open(url)
 
-    # ── Run tray loop ──
-    app.run()
+    # ── Menu bar icon (rumps, optional) ──
+    try:
+        import rumps
+        from linkedin.daemon_controller import (
+            is_running as daemon_running,
+            start as daemon_start,
+            stop as daemon_stop,
+        )
+        _start_item = rumps.MenuItem("Start Automation")
+
+        def _toggle_daemon(_):
+            if daemon_running():
+                daemon_stop()
+                _start_item.title = "Start Automation"
+            else:
+                daemon_start()
+                _start_item.title = "Stop Automation"
+
+        _start_item.set_callback(_toggle_daemon)
+
+        def _quit(_):
+            daemon_stop()
+            time.sleep(0.5)
+            rumps.quit_application()
+
+        tray = rumps.App("JH Assistant", title="🧠")
+        tray.menu = [
+            rumps.MenuItem("Open Dashboard", callback=lambda _: webbrowser.open(f"{url}dashboard/job-hunt/")),
+            None,
+            _start_item,
+            None,
+            rumps.MenuItem("Quit", callback=_quit),
+        ]
+        tray.run()
+    except Exception:
+        # No tray icon — keep alive so the background server stays up
+        from threading import Event
+        Event().wait()
 
 
 if __name__ == "__main__":
