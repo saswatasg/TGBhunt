@@ -20,10 +20,14 @@
 [Download the latest release](https://github.com/saswatasg/TGBhunt/releases/latest)
 
 1. Download `jh-assistant-macos.zip`
-2. Unzip → double-click `JH Assistant.app`
+2. Unzip → **right-click** `JH Assistant.app` → **Open** (first launch only)
 3. Browser opens — complete the 3-step wizard
 4. Click **Start** on the dashboard
 5. Done — the bot runs silently in the background
+
+> **macOS security**: On first launch, right-click the app and choose *Open* instead of double-clicking. This is because the app isn't signed with an Apple Developer certificate (ad-hoc signed only).
+>
+> **First run**: The app may prompt you to run `playwright install chromium` in Terminal. This installs the browser engine (~350 MB, one-time).
 
 **No terminal. No Python. No setup.**
 
