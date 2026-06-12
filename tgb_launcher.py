@@ -16,12 +16,12 @@ from pathlib import Path
 
 def main():
     root = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
-    data_dir = root / "jh_data"
+    data_dir = root / "tgb_data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    os.environ["JH_DATA_DIR"] = str(data_dir)
-    os.environ["JH_MODE"] = "1"
-    os.environ["DJANGO_SETTINGS_MODULE"] = "linkedin.jh_settings"
+    os.environ["TGB_DATA_DIR"] = str(data_dir)
+    os.environ["TGB_MODE"] = "1"
+    os.environ["DJANGO_SETTINGS_MODULE"] = "linkedin.tgb_settings"
     os.chdir(root)
 
     import django
@@ -33,8 +33,8 @@ def main():
     import logging
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    host = os.environ.get("JH_HOST", "127.0.0.1")
-    port = os.environ.get("JH_PORT", "8000")
+    host = os.environ.get("TGB_HOST", "127.0.0.1")
+    port = os.environ.get("TGB_PORT", "8000")
     url = f"http://{host}:{port}/"
 
     # ── Background web server ──
@@ -86,7 +86,7 @@ def main():
             time.sleep(0.5)
             rumps.quit_application()
 
-        tray = rumps.App("JH Assistant", title="🧠")
+        tray = rumps.App("TGB Hunt", title="🧠")
         tray.menu = [
             rumps.MenuItem("Open Dashboard", callback=lambda _: webbrowser.open(f"{url}dashboard/job-hunt/")),
             None,

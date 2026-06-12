@@ -1,4 +1,4 @@
-# Job Hunt Assistant
+# TGB Hunt
 
 > **Self-hosted LinkedIn automation for job seekers.** Connect with recruiters and hiring managers at your target companies, powered by AI.
 
@@ -19,8 +19,8 @@
 
 [Download the latest release](https://github.com/saswatasg/TGBhunt/releases/latest)
 
-1. Download `jh-assistant-macos.zip`
-2. Unzip → **right-click** `JH Assistant.app` → **Open** (first launch only)
+1. Download `tgb-hunt-macos.zip`
+2. Unzip → **right-click** `TGB Hunt.app` → **Open** (first launch only)
 3. Browser opens — complete the 3-step wizard
 4. Click **Start** on the dashboard
 5. Done — the bot runs silently in the background
@@ -86,9 +86,9 @@ No. It connects you with people (recruiters, hiring managers, team leads) so you
 │   ├── agents/        # AI conversation agents
 │   ├── browser/       # LinkedIn browser automation
 │   ├── daemon.py      # Background task worker
-│   ├── jh_dashboard.py
-│   ├── jh_settings.py
-│   ├── jh_urls.py
+│   ├── tgb_dashboard.py
+│   ├── tgb_settings.py
+│   ├── tgb_urls.py
 │   ├── models.py      # Campaign, JobHuntProfile
 │   ├── pipeline/      # Candidate search
 │   ├── tasks/         # Connect, follow-up, check pending

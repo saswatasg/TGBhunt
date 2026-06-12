@@ -30,19 +30,19 @@ jobs:
 
       - name: Bundle as .app
         run: |
-          export APP="dist/JH Assistant.app"
+          export APP="dist/TGB Hunt.app"
           mkdir -p "$APP/Contents/MacOS"
-          cp dist/jh_assistant "$APP/Contents/MacOS/jh_assistant"
-          chmod +x "$APP/Contents/MacOS/jh_assistant"
+          cp dist/tgb_hunt "$APP/Contents/MacOS/tgb_hunt"
+          chmod +x "$APP/Contents/MacOS/tgb_hunt"
           python3 -c "
           import os, plistlib
           ref = os.environ['GITHUB_REF_NAME']
           app = os.environ['APP']
           plistlib.dump({
-              'CFBundleExecutable': 'jh_assistant',
-              'CFBundleIdentifier': 'com.jobhunt.assistant',
+              'CFBundleExecutable': 'tgb_hunt',
+              'CFBundleIdentifier': 'com.tgbhunt.app',
               'CFBundleInfoDictionaryVersion': '6.0',
-              'CFBundleName': 'JH Assistant',
+              'CFBundleName': 'TGB Hunt',
               'CFBundlePackageType': 'APPL',
               'CFBundleShortVersionString': ref,
               'CFBundleVersion': ref,
@@ -53,13 +53,13 @@ jobs:
 
       - name: Zip .app
         run: |
-          cd dist && zip -r jh-assistant-macos.zip "JH Assistant.app"
+          cd dist && zip -r tgb-hunt-macos.zip "TGB Hunt.app"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jh-assistant-macos
-          path: dist/jh-assistant-macos.zip
+          name: tgb-hunt-macos
+          path: dist/tgb-hunt-macos.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -67,4 +67,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: dist/jh-assistant-macos.zip
+          files: dist/tgb-hunt-macos.zip

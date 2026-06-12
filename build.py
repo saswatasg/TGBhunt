@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SPEC_FILE = HERE / "jh_assistant.spec"
+SPEC_FILE = HERE / "tgb_hunt.spec"
 DIST_DIR = HERE / "dist"
 BUILD_DIR = HERE / "build"
 
@@ -94,7 +94,7 @@ def build_spec(chromium_path):
 
     spec = f"""# -*- mode: python ; coding: utf-8 -*-
 a = Analysis(
-    ['jh_launcher.py'],
+    ['tgb_launcher.py'],
     pathex=[],
     binaries={binaries!r},
     datas={datas!r},
@@ -119,12 +119,11 @@ a = Analysis(
         'pyobjc_framework_Cocoa',
         'linkedin',
         'linkedin.models',
-        'linkedin.jh_settings',
-        'linkedin.jh_urls',
-        'linkedin.jh_dashboard',
-        'linkedin.views.jh_setup',
+        'linkedin.tgb_settings',
+        'linkedin.tgb_urls',
+        'linkedin.tgb_dashboard',
         'linkedin.daemon',
-        'linkedin.jh_dashboard',
+        'linkedin.tgb_dashboard',
         'linkedin.admin',
         'linkedin.ml.qualifier',
         'linkedin.tasks.connect',
@@ -164,7 +163,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='jh_assistant',
+    name='tgb_hunt',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -217,7 +216,7 @@ def main():
         print("Build failed!")
         sys.exit(1)
 
-    exe_path = DIST_DIR / "jh_assistant"
+    exe_path = DIST_DIR / "tgb_hunt"
     if sys.platform == "win32":
         exe_path = exe_path.with_suffix(".exe")
     if exe_path.exists():
@@ -227,7 +226,7 @@ def main():
     else:
         print("Build completed but executable not found at expected path.")
 
-    print("\nTo distribute, zip the entire dist/jh_assistant directory.")
+    print("\nTo distribute, zip the entire dist/tgb_hunt directory.")
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "linkedin.jh_urls"
+ROOT_URLCONF = "linkedin.tgb_urls"
 
 TEMPLATES = [
     {

@@ -38,4 +38,4 @@ pytest tests/
 - **Job Hunt mode**: `Campaign.is_job_hunt` flag. Setup via wizard at `/setup/`. Uses `JobHuntProfile` model. Searches LinkedIn for recruiters/hiring managers. Uses `job_hunt_agent.j2` prompt template.
 - **Config**: `SiteConfig` DB singleton. `conf.py` for defaults.
 - **Django apps**: `linkedin` (main), `crm` (Lead/Deal), `chat` (ChatMessage).
-- **Data dir**: `jh_data/` next to the executable, or `data/` in development.
+- **Data dir**: `tgb_data/` next to the executable, or `data/` in development.

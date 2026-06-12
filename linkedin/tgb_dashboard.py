@@ -1,5 +1,5 @@
-# linkedin/jh_dashboard.py
-"""Job-hunt-only dashboard views."""
+# linkedin/tgb_dashboard.py
+"""TGB Hunt dashboard views."""
 from __future__ import annotations
 
 from datetime import timedelta

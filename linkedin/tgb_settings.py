@@ -1,5 +1,5 @@
-# linkedin/jh_settings.py
-"""Job-hunt-only Django settings."""
+# linkedin/tgb_settings.py
+"""TGB Hunt Django settings."""
 import os
 import sys
 from pathlib import Path
@@ -7,11 +7,11 @@ from pathlib import Path
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 # Data directory: env var wins, otherwise next to executable (frozen) or project root (dev)
-_data_env = os.environ.get("JH_DATA_DIR")
+_data_env = os.environ.get("TGB_DATA_DIR")
 if _data_env:
     _data_root = Path(_data_env)
 elif getattr(sys, "frozen", False):
-    _data_root = Path(sys.executable).parent / "jh_data"
+    _data_root = Path(sys.executable).parent / "tgb_data"
 else:
     _data_root = Path(__file__).resolve().parent.parent / "data"
 _data_root.mkdir(parents=True, exist_ok=True)
@@ -44,7 +44,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "linkedin.jh_urls"
+ROOT_URLCONF = "linkedin.tgb_urls"
 
 TEMPLATES = [
     {
